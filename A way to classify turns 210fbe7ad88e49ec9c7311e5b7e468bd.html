@@ -1,0 +1,687 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>A way to classify turns</title><style>
+/* cspell:disable-file */
+/* webkit printing magic: print all background colors */
+html {
+	-webkit-print-color-adjust: exact;
+}
+* {
+	box-sizing: border-box;
+	-webkit-print-color-adjust: exact;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+}
+@media only screen {
+	body {
+		margin: 2em auto;
+		max-width: 900px;
+		color: rgb(55, 53, 47);
+	}
+}
+
+body {
+	line-height: 1.5;
+	white-space: pre-wrap;
+}
+
+a,
+a.visited {
+	color: inherit;
+	text-decoration: underline;
+}
+
+.pdf-relative-link-path {
+	font-size: 80%;
+	color: #444;
+}
+
+h1,
+h2,
+h3 {
+	letter-spacing: -0.01em;
+	line-height: 1.2;
+	font-weight: 600;
+	margin-bottom: 0;
+}
+
+.page-title {
+	font-size: 2.5rem;
+	font-weight: 700;
+	margin-top: 0;
+	margin-bottom: 0.75em;
+}
+
+h1 {
+	font-size: 1.875rem;
+	margin-top: 1.875rem;
+}
+
+h2 {
+	font-size: 1.5rem;
+	margin-top: 1.5rem;
+}
+
+h3 {
+	font-size: 1.25rem;
+	margin-top: 1.25rem;
+}
+
+.source {
+	border: 1px solid #ddd;
+	border-radius: 3px;
+	padding: 1.5em;
+	word-break: break-all;
+}
+
+.callout {
+	border-radius: 3px;
+	padding: 1rem;
+}
+
+figure {
+	margin: 1.25em 0;
+	page-break-inside: avoid;
+}
+
+figcaption {
+	opacity: 0.5;
+	font-size: 85%;
+	margin-top: 0.5em;
+}
+
+mark {
+	background-color: transparent;
+}
+
+.indented {
+	padding-left: 1.5em;
+}
+
+hr {
+	background: transparent;
+	display: block;
+	width: 100%;
+	height: 1px;
+	visibility: visible;
+	border: none;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+img {
+	max-width: 100%;
+}
+
+@media only print {
+	img {
+		max-height: 100vh;
+		object-fit: contain;
+	}
+}
+
+@page {
+	margin: 1in;
+}
+
+.collection-content {
+	font-size: 0.875rem;
+}
+
+.column-list {
+	display: flex;
+	justify-content: space-between;
+}
+
+.column {
+	padding: 0 1em;
+}
+
+.column:first-child {
+	padding-left: 0;
+}
+
+.column:last-child {
+	padding-right: 0;
+}
+
+.table_of_contents-item {
+	display: block;
+	font-size: 0.875rem;
+	line-height: 1.3;
+	padding: 0.125rem;
+}
+
+.table_of_contents-indent-1 {
+	margin-left: 1.5rem;
+}
+
+.table_of_contents-indent-2 {
+	margin-left: 3rem;
+}
+
+.table_of_contents-indent-3 {
+	margin-left: 4.5rem;
+}
+
+.table_of_contents-link {
+	text-decoration: none;
+	opacity: 0.7;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.18);
+}
+
+table,
+th,
+td {
+	border: 1px solid rgba(55, 53, 47, 0.09);
+	border-collapse: collapse;
+}
+
+table {
+	border-left: none;
+	border-right: none;
+}
+
+th,
+td {
+	font-weight: normal;
+	padding: 0.25em 0.5em;
+	line-height: 1.5;
+	min-height: 1.5em;
+	text-align: left;
+}
+
+th {
+	color: rgba(55, 53, 47, 0.6);
+}
+
+ol,
+ul {
+	margin: 0;
+	margin-block-start: 0.6em;
+	margin-block-end: 0.6em;
+}
+
+li > ol:first-child,
+li > ul:first-child {
+	margin-block-start: 0.6em;
+}
+
+ul > li {
+	list-style: disc;
+}
+
+ul.to-do-list {
+	padding-inline-start: 0;
+}
+
+ul.to-do-list > li {
+	list-style: none;
+}
+
+.to-do-children-checked {
+	text-decoration: line-through;
+	opacity: 0.375;
+}
+
+ul.toggle > li {
+	list-style: none;
+}
+
+ul {
+	padding-inline-start: 1.7em;
+}
+
+ul > li {
+	padding-left: 0.1em;
+}
+
+ol {
+	padding-inline-start: 1.6em;
+}
+
+ol > li {
+	padding-left: 0.2em;
+}
+
+.mono ol {
+	padding-inline-start: 2em;
+}
+
+.mono ol > li {
+	text-indent: -0.4em;
+}
+
+.toggle {
+	padding-inline-start: 0em;
+	list-style-type: none;
+}
+
+/* Indent toggle children */
+.toggle > li > details {
+	padding-left: 1.7em;
+}
+
+.toggle > li > details > summary {
+	margin-left: -1.1em;
+}
+
+.selected-value {
+	display: inline-block;
+	padding: 0 0.5em;
+	background: rgba(206, 205, 202, 0.5);
+	border-radius: 3px;
+	margin-right: 0.5em;
+	margin-top: 0.3em;
+	margin-bottom: 0.3em;
+	white-space: nowrap;
+}
+
+.collection-title {
+	display: inline-block;
+	margin-right: 1em;
+}
+
+.page-description {
+    margin-bottom: 2em;
+}
+
+.simple-table {
+	margin-top: 1em;
+	font-size: 0.875rem;
+	empty-cells: show;
+}
+.simple-table td {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table th {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table-header-color {
+	background: rgb(247, 246, 243);
+	color: black;
+}
+.simple-table-header {
+	font-weight: 500;
+}
+
+time {
+	opacity: 0.5;
+}
+
+.icon {
+	display: inline-block;
+	max-width: 1.2em;
+	max-height: 1.2em;
+	text-decoration: none;
+	vertical-align: text-bottom;
+	margin-right: 0.5em;
+}
+
+img.icon {
+	border-radius: 3px;
+}
+
+.user-icon {
+	width: 1.5em;
+	height: 1.5em;
+	border-radius: 100%;
+	margin-right: 0.5rem;
+}
+
+.user-icon-inner {
+	font-size: 0.8em;
+}
+
+.text-icon {
+	border: 1px solid #000;
+	text-align: center;
+}
+
+.page-cover-image {
+	display: block;
+	object-fit: cover;
+	width: 100%;
+	max-height: 30vh;
+}
+
+.page-header-icon {
+	font-size: 3rem;
+	margin-bottom: 1rem;
+}
+
+.page-header-icon-with-cover {
+	margin-top: -0.72em;
+	margin-left: 0.07em;
+}
+
+.page-header-icon img {
+	border-radius: 3px;
+}
+
+.link-to-page {
+	margin: 1em 0;
+	padding: 0;
+	border: none;
+	font-weight: 500;
+}
+
+p > .user {
+	opacity: 0.5;
+}
+
+td > .user,
+td > time {
+	white-space: nowrap;
+}
+
+input[type="checkbox"] {
+	transform: scale(1.5);
+	margin-right: 0.6em;
+	vertical-align: middle;
+}
+
+p {
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+}
+
+.image {
+	border: none;
+	margin: 1.5em 0;
+	padding: 0;
+	border-radius: 0;
+	text-align: center;
+}
+
+.code,
+code {
+	background: rgba(135, 131, 120, 0.15);
+	border-radius: 3px;
+	padding: 0.2em 0.4em;
+	border-radius: 3px;
+	font-size: 85%;
+	tab-size: 2;
+}
+
+code {
+	color: #eb5757;
+}
+
+.code {
+	padding: 1.5em 1em;
+}
+
+.code-wrap {
+	white-space: pre-wrap;
+	word-break: break-all;
+}
+
+.code > code {
+	background: none;
+	padding: 0;
+	font-size: 100%;
+	color: inherit;
+}
+
+blockquote {
+	font-size: 1.25em;
+	margin: 1em 0;
+	padding-left: 1em;
+	border-left: 3px solid rgb(55, 53, 47);
+}
+
+.bookmark {
+	text-decoration: none;
+	max-height: 8em;
+	padding: 0;
+	display: flex;
+	width: 100%;
+	align-items: stretch;
+}
+
+.bookmark-title {
+	font-size: 0.85em;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	height: 1.75em;
+	white-space: nowrap;
+}
+
+.bookmark-text {
+	display: flex;
+	flex-direction: column;
+}
+
+.bookmark-info {
+	flex: 4 1 180px;
+	padding: 12px 14px 14px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+.bookmark-image {
+	width: 33%;
+	flex: 1 1 180px;
+	display: block;
+	position: relative;
+	object-fit: cover;
+	border-radius: 1px;
+}
+
+.bookmark-description {
+	color: rgba(55, 53, 47, 0.6);
+	font-size: 0.75em;
+	overflow: hidden;
+	max-height: 4.5em;
+	word-break: break-word;
+}
+
+.bookmark-href {
+	font-size: 0.75em;
+	margin-top: 0.25em;
+}
+
+.sans { font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol"; }
+.code { font-family: "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace; }
+.serif { font-family: Lyon-Text, Georgia, ui-serif, serif; }
+.mono { font-family: iawriter-mono, Nitti, Menlo, Courier, monospace; }
+.pdf .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK JP'; }
+.pdf:lang(zh-CN) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK SC'; }
+.pdf:lang(zh-TW) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK TC'; }
+.pdf:lang(ko-KR) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK KR'; }
+.pdf .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.pdf .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK JP'; }
+.pdf:lang(zh-CN) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK SC'; }
+.pdf:lang(zh-TW) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK TC'; }
+.pdf:lang(ko-KR) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK KR'; }
+.pdf .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.highlight-default {
+	color: rgba(55, 53, 47, 1);
+}
+.highlight-gray {
+	color: rgba(120, 119, 116, 1);
+	fill: rgba(120, 119, 116, 1);
+}
+.highlight-brown {
+	color: rgba(159, 107, 83, 1);
+	fill: rgba(159, 107, 83, 1);
+}
+.highlight-orange {
+	color: rgba(217, 115, 13, 1);
+	fill: rgba(217, 115, 13, 1);
+}
+.highlight-yellow {
+	color: rgba(203, 145, 47, 1);
+	fill: rgba(203, 145, 47, 1);
+}
+.highlight-teal {
+	color: rgba(68, 131, 97, 1);
+	fill: rgba(68, 131, 97, 1);
+}
+.highlight-blue {
+	color: rgba(51, 126, 169, 1);
+	fill: rgba(51, 126, 169, 1);
+}
+.highlight-purple {
+	color: rgba(144, 101, 176, 1);
+	fill: rgba(144, 101, 176, 1);
+}
+.highlight-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.highlight-red {
+	color: rgba(212, 76, 71, 1);
+	fill: rgba(212, 76, 71, 1);
+}
+.highlight-default_background {
+	color: rgba(55, 53, 47, 1);
+}
+.highlight-gray_background {
+	background: rgba(241, 241, 239, 1);
+}
+.highlight-brown_background {
+	background: rgba(244, 238, 238, 1);
+}
+.highlight-orange_background {
+	background: rgba(251, 236, 221, 1);
+}
+.highlight-yellow_background {
+	background: rgba(251, 237, 214, 1);
+}
+.highlight-teal_background {
+	background: rgba(237, 243, 236, 1);
+}
+.highlight-blue_background {
+	background: rgba(231, 243, 248, 1);
+}
+.highlight-purple_background {
+	background: rgba(244, 240, 247, 0.8);
+}
+.highlight-pink_background {
+	background: rgba(249, 238, 243, 0.8);
+}
+.highlight-red_background {
+	background: rgba(253, 235, 236, 1);
+}
+.block-color-default {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray {
+	color: rgba(120, 119, 116, 1);
+	fill: rgba(120, 119, 116, 1);
+}
+.block-color-brown {
+	color: rgba(159, 107, 83, 1);
+	fill: rgba(159, 107, 83, 1);
+}
+.block-color-orange {
+	color: rgba(217, 115, 13, 1);
+	fill: rgba(217, 115, 13, 1);
+}
+.block-color-yellow {
+	color: rgba(203, 145, 47, 1);
+	fill: rgba(203, 145, 47, 1);
+}
+.block-color-teal {
+	color: rgba(68, 131, 97, 1);
+	fill: rgba(68, 131, 97, 1);
+}
+.block-color-blue {
+	color: rgba(51, 126, 169, 1);
+	fill: rgba(51, 126, 169, 1);
+}
+.block-color-purple {
+	color: rgba(144, 101, 176, 1);
+	fill: rgba(144, 101, 176, 1);
+}
+.block-color-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.block-color-red {
+	color: rgba(212, 76, 71, 1);
+	fill: rgba(212, 76, 71, 1);
+}
+.block-color-default_background {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray_background {
+	background: rgba(241, 241, 239, 1);
+}
+.block-color-brown_background {
+	background: rgba(244, 238, 238, 1);
+}
+.block-color-orange_background {
+	background: rgba(251, 236, 221, 1);
+}
+.block-color-yellow_background {
+	background: rgba(251, 237, 214, 1);
+}
+.block-color-teal_background {
+	background: rgba(237, 243, 236, 1);
+}
+.block-color-blue_background {
+	background: rgba(231, 243, 248, 1);
+}
+.block-color-purple_background {
+	background: rgba(244, 240, 247, 0.8);
+}
+.block-color-pink_background {
+	background: rgba(249, 238, 243, 0.8);
+}
+.block-color-red_background {
+	background: rgba(253, 235, 236, 1);
+}
+.select-value-color-uiBlue { background-color: rgba(35, 131, 226, .07); }
+.select-value-color-pink { background-color: rgba(245, 224, 233, 1); }
+.select-value-color-purple { background-color: rgba(232, 222, 238, 1); }
+.select-value-color-green { background-color: rgba(219, 237, 219, 1); }
+.select-value-color-gray { background-color: rgba(227, 226, 224, 1); }
+.select-value-color-transparentGray { background-color: rgba(227, 226, 224, 0); }
+.select-value-color-translucentGray { background-color: rgba(0, 0, 0, 0.06); }
+.select-value-color-orange { background-color: rgba(250, 222, 201, 1); }
+.select-value-color-brown { background-color: rgba(238, 224, 218, 1); }
+.select-value-color-red { background-color: rgba(255, 226, 221, 1); }
+.select-value-color-yellow { background-color: rgba(249, 228, 188, 1); }
+.select-value-color-blue { background-color: rgba(211, 229, 239, 1); }
+.select-value-color-pageGlass { background-color: undefined; }
+.select-value-color-washGlass { background-color: undefined; }
+
+.checkbox {
+	display: inline-flex;
+	vertical-align: text-bottom;
+	width: 16;
+	height: 16;
+	background-size: 16px;
+	margin-left: 2px;
+	margin-right: 5px;
+}
+
+.checkbox-on {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20width%3D%2216%22%20height%3D%2216%22%20fill%3D%22%2358A9D7%22%2F%3E%0A%3Cpath%20d%3D%22M6.71429%2012.2852L14%204.9995L12.7143%203.71436L6.71429%209.71378L3.28571%206.2831L2%207.57092L6.71429%2012.2852Z%22%20fill%3D%22white%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+
+.checkbox-off {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20x%3D%220.75%22%20y%3D%220.75%22%20width%3D%2214.5%22%20height%3D%2214.5%22%20fill%3D%22white%22%20stroke%3D%22%2336352F%22%20stroke-width%3D%221.5%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+	
+</style></head><body><article id="210fbe7a-d88e-49ec-9c73-11e5b7e468bd" class="page sans"><header><h1 class="page-title">A way to classify turns</h1><p class="page-description"></p></header><div class="page-body"><p id="6e7d8fe1-9d7f-454b-a8a8-1308d09fd701" class="">Credit: Jazz Berlin, David Cox</p><p id="fa49e8a7-d2ab-47dd-b010-fdf2f1c362fc" class="">Defining surfing maneuvers is a frustrating task. There is lots of overlap and inconsistency in classifications that I have found on the internet. For example the turn Lakey Peterson calls a snap Martin Dunn calls a reentry. This exercise is not about determining who is right or wrong, I just want to define turns for myself. </p><p id="aa341261-fda1-4d5c-b62c-39ffd5b46bcc" class=""><a href="https://www.youtube.com/watch?v=FlfEFrTb-ts">https://www.youtube.com/watch?v=FlfEFrTb-ts</a></p><p id="6b77143a-f13a-46ce-93b7-e1a20b6e700f" class=""><a href="https://www.youtube.com/watch?v=qj3HUcAH4sc">https://www.youtube.com/watch?v=qj3HUcAH4sc</a></p><p id="95792435-5e31-4fd8-8ea0-0cb9185d737a" class="">Every wave is a different shape, power, speed and size. You can perform turns in multiple places on the wave and that will effect the how critical/difficult each turn is. </p><p id="370c291f-c499-4c45-b36d-8c7a53d637de" class="">To define turns we need to have an understanding of the different locations/features of a wave. We need to know that the pocket is the steepest part of the wave. We need to know that the lip is the crest of the wave about to break. We need to know that the shoulder is further along the wave, farther than the pocket.</p><figure id="7a1ac03e-750f-42f5-969b-a17745b7734b" class="image"><a href="A%20way%20to%20classify%20turns%20210fbe7ad88e49ec9c7311e5b7e468bd/Untitled-2024-05-04-1214.svg"><img style="width:564px" src="A%20way%20to%20classify%20turns%20210fbe7ad88e49ec9c7311e5b7e468bd/Untitled-2024-05-04-1214.svg"/></a></figure><p id="96364f1f-6cfb-4cdc-ad2b-5efbcd1b9c6a" class="">The ideas for this classification were in Martin Dunn’s tutorial videos and distilled into these useful diagrams by The Wave’s local surf guru Jazz Berlin. Ideally this will provide a vocabulary for talking about the shape of the turn, leaving room for words to describe frills. For example a layback half-snap and a grab-rail half-snap will look different but the surfer will be traveling through the same positions on the wave. </p><h2 id="0c4ccc99-e260-4129-9c7e-78c9470b7228" class="">Re-entry</h2><p id="2e9753f8-d668-46cd-92e1-e108d7dd3f4f" class="">
+</p><figure id="6ce72393-02bf-4f5a-9877-70b8cac4f4d6" class="image"><a href="A%20way%20to%20classify%20turns%20210fbe7ad88e49ec9c7311e5b7e468bd/Untitled-2024-05-04-1214-2.svg"><img style="width:564px" src="A%20way%20to%20classify%20turns%20210fbe7ad88e49ec9c7311e5b7e468bd/Untitled-2024-05-04-1214-2.svg"/></a></figure><div id="2680afc7-da96-4f70-b102-1b45c11494e1" class="column-list"><div id="54800f84-fdd8-4dcc-a767-b90c998db6ea" style="width:50%" class="column"><figure id="dfbbb75b-fdbd-4030-98cd-af710ec8e0d3" class="image"><a href="https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExYWR0d3B5YXZocHlyM2loNm02eGNzM3pzejFmamdhZG1yYms4ZGg4MSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/woDf5l1fhW4f1DmN5r/giphy.gif"><img src="https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExYWR0d3B5YXZocHlyM2loNm02eGNzM3pzejFmamdhZG1yYms4ZGg4MSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/woDf5l1fhW4f1DmN5r/giphy.gif"/></a></figure></div><div id="f5a0d3c0-cc2f-4d33-8a94-7f34896c7a74" style="width:50%" class="column"><figure id="6de7d46a-b8b5-401a-a571-31b20bdec4c8" class="image"><a href="https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExa2tiNm9vOXJuNWNxZW1pODQwbDZqdTJzOWcyc210Mnk3anczb3pvbCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/CIZ0cqmy3iRgh524ZN/giphy-downsized-large.gif"><img src="https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExa2tiNm9vOXJuNWNxZW1pODQwbDZqdTJzOWcyc210Mnk3anczb3pvbCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/CIZ0cqmy3iRgh524ZN/giphy-downsized-large.gif"/></a></figure></div></div><div id="0ecb91ef-d049-45f9-8552-7d2b6a488115" class="column-list"><div id="974ce8d8-4de1-45b5-b82f-77957f4a46e6" style="width:50%" class="column"><figure id="e3ec5007-8686-49cd-81dd-6ded989c2270" class="image"><a href="https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExZ2FyeWZpdTJ0M21jMXpmdDlvemk5d2MzMnF2djEyd3NzZDBkdmRpZyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/aq6Jwl2TDAEuRQpPqL/giphy.gif"><img src="https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExZ2FyeWZpdTJ0M21jMXpmdDlvemk5d2MzMnF2djEyd3NzZDBkdmRpZyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/aq6Jwl2TDAEuRQpPqL/giphy.gif"/></a></figure></div><div id="e451dd95-f97e-4518-8fac-8966b6185cb2" style="width:50%" class="column"><figure id="47fe9089-5f2d-46ba-b1af-671df395132e" class="image"><a href="https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExbGR6MGliNWRnaHQ5NWg2cGl5NGJ5aXJhaDhrY2E5OWlpZGh2NzlrdSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/UCG01m23llmecV44e8/giphy-downsized-large.gif"><img src="https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExbGR6MGliNWRnaHQ5NWg2cGl5NGJ5aXJhaDhrY2E5OWlpZGh2NzlrdSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/UCG01m23llmecV44e8/giphy-downsized-large.gif"/></a></figure></div></div><p id="6958170f-70e9-4d2d-bb72-22f7ecf6e970" class="">A re-entry (also known as a rio) occurs when the surfer does a steep bottom turn all the way up into the lip, sharply rotates his board and then re-enters the wave.</p><p id="f1984012-703e-4c40-a0b5-10f2ddcf0b73" class="">A large number of people call this a snap, but for the purpose of my classification it will be a reentry so that I can reasonably talk about what follows. </p><p id="5cd893b5-a3e2-4f54-9e3f-ed38f35a5d39" class=""><strong>Variants</strong>: Blow-tail, tail-slide, layback </p><h2 id="7f2a7e00-1d8a-48c9-a81a-7fdb2439914b" class="">Snap</h2><p id="210da8ed-daff-465c-bcb5-b6686376df8c" class="">This one is frustrating for me, so here are some definitions from people on the internet. </p><blockquote id="9fdddc34-b832-427d-a2b3-b82ab21e2858" class="">The snap, also known as slash, is a radical change of trajectory in the pocket or the top of the wave. When performed abruptly, it produces spectacular, flashy buckets of spray above the surfer. (Luis M. Pinto)</blockquote><blockquote id="e1a5931c-e585-4690-b2c6-29a55129a11b" class="">A snap is a sharper and more aggressive version of carving, and it&#x27;s basically a change of direction. However, one thing to keep in mind is that it can only be performed on a steep wave, and besides speed and body coordination, it requires a perfected bottom turn. (Jeremy Dean)</blockquote><blockquote id="fd5f3dc8-e415-41cf-bfae-731d9def29e2" class="">The forehand snap is a rail turn performed in the pocket sections of waves where speed is maintained throughout. This maintenance of speed is created by the surfer looking back to the foam, which is turn allows the full rotation of the arms, upper body and hips creating a drive force through the turn. (Martin Dunn) </blockquote><p id="e0e30d43-c726-43ee-92cb-a5ef1158e3bc" class="">Martin Dunn talks about full snaps and half snaps, and this refers to how far the board comes around by the end of the turn. The easiest way to think about it is: </p><p id="18721c87-face-47dd-8db4-715f90815284" class=""><strong>Full snaps</strong> go back to the pocket.</p><p id="ff70fcdc-37d9-4c9a-a545-710e4da19cd4" class=""><strong>Half snaps</strong> go back to the trough.</p><div id="08e8015d-282a-4fcb-ae98-8847bb2cc8b8" class="column-list"><div id="4a7f1517-712f-4ba6-9675-5b8f755299fc" style="width:50%" class="column"><h3 id="41f13b32-835f-4d36-a4b8-42352115431c" class="">Full Snap</h3><figure id="753d5d1d-d413-4369-84f0-b42f56bf9e90" class="image"><a href="A%20way%20to%20classify%20turns%20210fbe7ad88e49ec9c7311e5b7e468bd/Untitled-2024-05-04-1214-3.svg"><img style="width:564px" src="A%20way%20to%20classify%20turns%20210fbe7ad88e49ec9c7311e5b7e468bd/Untitled-2024-05-04-1214-3.svg"/></a></figure><figure id="b67ea00f-1088-4153-a5e8-618101de7b72" class="image"><a href="https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExemppaGUwcnVnbndxOG95Nm5vamZzMzZpd2FkNGd6a2N4Z2g2Z24zbSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/oarzlb5oQksrXqBg8g/giphy.gif"><img src="https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExemppaGUwcnVnbndxOG95Nm5vamZzMzZpd2FkNGd6a2N4Z2g2Z24zbSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/oarzlb5oQksrXqBg8g/giphy.gif"/></a></figure><figure id="a4569d34-a82e-42f6-80b6-9af914c772e9" class="image"><a href="https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExNWxzNGllbjhtcG0zaTVscmdnZ3Jrd3pwYjNxcHJ2NnRsZ3pkZGIyeCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/0HnaCjr6nv3EUsUCMZ/giphy.gif"><img src="https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExNWxzNGllbjhtcG0zaTVscmdnZ3Jrd3pwYjNxcHJ2NnRsZ3pkZGIyeCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/0HnaCjr6nv3EUsUCMZ/giphy.gif"/></a></figure><figure id="a5ad0409-a7ff-4c06-aac8-3a859bc15db3" class="image"><a href="https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExcnE5MjQydTFwaHY1eGV1ejYyaWRsOHVmMWdrMXFuNWlleTc2dHdpdyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/QXFzdg8RWKnKb8I4MV/giphy.gif"><img src="https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExcnE5MjQydTFwaHY1eGV1ejYyaWRsOHVmMWdrMXFuNWlleTc2dHdpdyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/QXFzdg8RWKnKb8I4MV/giphy.gif"/></a></figure></div><div id="324e5d9f-9f56-4f24-97f4-76e99971d378" style="width:50%" class="column"><h3 id="3b5a1a96-5394-40a4-a8b4-89b80605d3e7" class="">Half-snap</h3><figure id="d6a9ef90-1155-4538-9be2-e32616bdbbb3" class="image"><a href="A%20way%20to%20classify%20turns%20210fbe7ad88e49ec9c7311e5b7e468bd/Untitled-2024-05-04-1214-8.svg"><img style="width:564px" src="A%20way%20to%20classify%20turns%20210fbe7ad88e49ec9c7311e5b7e468bd/Untitled-2024-05-04-1214-8.svg"/></a></figure><figure id="f4e273a1-e0bf-4c9f-9d06-04cff2475dd8" class="image"><a href="https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExd2NzOG5majR6am1yMDI3cnFkMGthcWUzd3JxNXlyeGh4MndkYzVrbCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/0nnJiHDfaT2WcSI0HY/giphy.gif"><img src="https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExd2NzOG5majR6am1yMDI3cnFkMGthcWUzd3JxNXlyeGh4MndkYzVrbCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/0nnJiHDfaT2WcSI0HY/giphy.gif"/></a></figure><figure id="217bf2bb-1d09-4594-a0b8-8dea8273405b" class="image"><a href="https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExNDI2Z3Rzd2RrNmIycG9wZjQyb2pubXNpYnk0NmFjbmZza2F4a3p2NSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/Dkoodpb3Oi0sM5XK95/giphy.gif"><img src="https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExNDI2Z3Rzd2RrNmIycG9wZjQyb2pubXNpYnk0NmFjbmZza2F4a3p2NSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/Dkoodpb3Oi0sM5XK95/giphy.gif"/></a></figure><figure id="0d70b883-9507-421c-89b0-b9c0d60676a9" class="image"><a href="https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExaDBtYXYzaThlZDVxbXRsaW55cWRveHBkOWo4b25vY3pwbTcxbnhpNiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/nVNjTS7ufelYPWE5oR/giphy.gif"><img src="https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExaDBtYXYzaThlZDVxbXRsaW55cWRveHBkOWo4b25vY3pwbTcxbnhpNiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/nVNjTS7ufelYPWE5oR/giphy.gif"/></a></figure></div></div><p id="4ec3010a-88c2-442e-9032-72a5bfc57909" class=""><strong>Variants</strong>: Tailslide, layback, grab-rail, dropped-wallet, down carve</p><h2 id="b26f581e-4618-4dc5-911e-577177e1e7a9" class="">Cutback</h2><figure id="b6806eec-65eb-40dc-b926-704031ea2e93" class="image"><a href="A%20way%20to%20classify%20turns%20210fbe7ad88e49ec9c7311e5b7e468bd/Untitled-2024-05-04-1214-6.svg"><img style="width:564px" src="A%20way%20to%20classify%20turns%20210fbe7ad88e49ec9c7311e5b7e468bd/Untitled-2024-05-04-1214-6.svg"/></a></figure><div id="c9197337-452b-48aa-a86c-86a2a8964853" class="column-list"><div id="3df396be-69f3-4aae-a93a-a38b9e5c1a92" style="width:50%" class="column"><figure id="16685dd7-2bfe-4f08-817b-2b55a20c192d" class="image"><a href="https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExaG04OXY5OWxqdG40aDgzN25obzZwanRla3JpNGwyMDU2d3lhcTV4NCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/pR1eLSZJ6hwqYg9f84/giphy.gif"><img src="https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExaG04OXY5OWxqdG40aDgzN25obzZwanRla3JpNGwyMDU2d3lhcTV4NCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/pR1eLSZJ6hwqYg9f84/giphy.gif"/></a></figure></div><div id="ee779a1d-e08b-4d4a-a4eb-1ae2249cd21d" style="width:50%" class="column"><figure id="c24ed903-fe37-4367-871b-bad50865116a" class="image"><a href="https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExa3l5MnRzYmdtbzVneDRkbmttZm8wMnlubnA1azR4ejkweWF1bXZmMCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/sGGW27BaOdXmZKGwga/giphy.gif"><img src="https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExa3l5MnRzYmdtbzVneDRkbmttZm8wMnlubnA1azR4ejkweWF1bXZmMCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/sGGW27BaOdXmZKGwga/giphy.gif"/></a></figure></div></div><p id="5efc08f4-82e9-482d-a28a-41454f0e87e9" class="">A cutback is when you do a shallower bottom turn out to the shoulder, and then change direction to come back to the foam.</p><p id="047c091b-0803-458b-8074-84f32315ccd7" class="">Cutbacks and snaps have some overlap depending on where you define the pocket and shoulder of the wave to be. </p><p id="7af3970a-b620-4807-b947-43f5b5660658" class=""><strong>Variants</strong>: layback, soul-arch, grab-rail</p><h2 id="fd9b0a60-0dec-401c-b7e6-5e80ab4b7b3e" class="">Roundhouse Cutback</h2><div id="3d227b0d-14c6-41e8-b98f-d12dc4724da3" class="column-list"><div id="0d43d717-0840-48f5-b29a-a2a856fe33fa" style="width:50%" class="column"><figure id="f43f0639-6380-4a5f-9e2b-53a705f4cac7" class="image"><a href="A%20way%20to%20classify%20turns%20210fbe7ad88e49ec9c7311e5b7e468bd/Untitled-2024-05-04-1214-7.svg"><img style="width:564px" src="A%20way%20to%20classify%20turns%20210fbe7ad88e49ec9c7311e5b7e468bd/Untitled-2024-05-04-1214-7.svg"/></a></figure></div><div id="69b50e3b-637b-42d5-9333-6a6590b9ad46" style="width:50%" class="column"><figure id="888988bb-322d-4d70-bc23-c596226b3f85" class="image"><a href="https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExZW9meWh6MnFsd3VmZmx6M2x2MmVuc2FramVnY3Fma20zNGduMGJsYiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/om9XRFRSV5Lb1uWY0o/giphy.gif"><img src="https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExZW9meWh6MnFsd3VmZmx6M2x2MmVuc2FramVnY3Fma20zNGduMGJsYiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/om9XRFRSV5Lb1uWY0o/giphy.gif"/></a></figure></div></div><p id="556360f7-d756-44d4-8f5b-9098f5c32bc4" class="">
+</p><p id="156e7e3c-326a-40cd-8e93-3fe08d4df2e4" class="">Roundhouse cutbacks are cutbacks that have a re-entry performed as the surfer rebounds off the foam. </p><p id="ae6991d9-c908-4c72-98eb-472bf0053a75" class=""><strong>Variants</strong>: None!</p><div id="3629dff9-41a1-4ca0-80a5-0bcc58b2a320" class="column-list"><div id="14fe8c49-edae-4979-909e-c65a81db3e46" style="width:50%" class="column"><h2 id="173e63e2-4003-485d-bdd8-153223f2759f" class="">Floaters</h2><figure id="9350a35b-d076-46d0-b4cd-1771ff01b8a9" class="image"><a href="A%20way%20to%20classify%20turns%20210fbe7ad88e49ec9c7311e5b7e468bd/Untitled-2024-05-04-1214-10.svg"><img style="width:324px" src="A%20way%20to%20classify%20turns%20210fbe7ad88e49ec9c7311e5b7e468bd/Untitled-2024-05-04-1214-10.svg"/></a></figure><figure id="94911914-870a-471a-8aa8-e776e3fe82ce" class="image"><a href="https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExZW1tOW01M2NlZXA5ZnpodGIzcm1zbmdtcnh5cXJxbnNpZnAzM2cwMyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/Y9hXz3J3dhiQvMt6EL/giphy-downsized-large.gif"><img src="https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExZW1tOW01M2NlZXA5ZnpodGIzcm1zbmdtcnh5cXJxbnNpZnAzM2cwMyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/Y9hXz3J3dhiQvMt6EL/giphy-downsized-large.gif"/></a></figure><p id="65fd5240-975f-49bd-9142-b91a14ca06bf" class=""><strong>Variants</strong>: Lip-line float</p></div><div id="cd16ef4a-8385-436e-8768-4ec1170688e7" style="width:50%" class="column"><h2 id="9c9f67cd-fc0a-467d-a331-036136291448" class="">Airs</h2><figure id="3646d0a7-587d-4676-bc4d-6095a95fa54f" class="image"><a href="A%20way%20to%20classify%20turns%20210fbe7ad88e49ec9c7311e5b7e468bd/Untitled-2024-05-04-1214-9.svg"><img style="width:324px" src="A%20way%20to%20classify%20turns%20210fbe7ad88e49ec9c7311e5b7e468bd/Untitled-2024-05-04-1214-9.svg"/></a></figure><figure id="6ccf3d80-fcc5-4e9c-ab89-75faea7f76c4" class="image"><a href="https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExeG9xanE0MzVmMzZxOThjNTN6cGVkZHlsZ2tsbWY5dW16amgwYzNocCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/Ml3FxBSO1oRgrjp3ss/giphy.gif"><img src="https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExeG9xanE0MzVmMzZxOThjNTN6cGVkZHlsZ2tsbWY5dW16amgwYzNocCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/Ml3FxBSO1oRgrjp3ss/giphy.gif"/></a></figure><p id="e0318fb4-68ac-4389-b1bf-cc37e3f09ead" class=""><strong>Variants</strong>: Alley-oop, grabs, straights, full-rotations etc</p></div></div><h2 id="01d3f83c-0af2-4cfd-8527-623fc613f771" class="">References</h2><p id="525de4e7-15e6-4c71-8bb8-dcb68b1ca7a4" class=""><a href="https://www.surfertoday.com/surfing/the-complete-list-of-surfing-tricks-and-maneuvers">https://www.surfertoday.com/surfing/the-complete-list-of-surfing-tricks-and-maneuvers</a></p><p id="f42aeef5-c2f3-4bdc-a010-30cef6c871e1" class=""><strong><a href="https://www.ombe.co/team/jeremy-dean">Jeremy Dean</a></strong><strong> </strong><a href="https://www.ombe.co/guides/the-ultimate-list-of-surfing-tricks">https://www.ombe.co/guides/the-ultimate-list-of-surfing-tricks</a> </p><p id="400c6d9e-9e6f-4b82-97d4-1343a0be6025" class=""><a href="https://www.youtube.com/watch?v=nVRVdgpzEck">https://www.youtube.com/watch?v=nVRVdgpzEck</a></p><p id="be30f3a8-6ca0-4db9-979b-f413d34e6819" class=""><a href="https://www.youtube.com/watch?v=qj3HUcAH4sc">https://www.youtube.com/watch?v=qj3HUcAH4sc</a></p><p id="0f066755-7f3d-48e7-90b9-0b9c0f9574cc" class="">Clips</p><p id="ab226aee-64ad-426a-be46-1a575c1f4c67" class=""><a href="https://www.youtube.com/watch?v=fJ5FMrOT8CY">https://www.youtube.com/watch?v=fJ5FMrOT8CY</a></p><p id="be138d40-8a7c-42c5-b6c1-8b679c6141fe" class=""><a href="https://www.youtube.com/watch?v=T0I1Jj9wP-w">https://www.youtube.com/watch?v=T0I1Jj9wP-w</a></p><p id="70060294-c3c7-4e93-bd0b-7d8f5d76d0c0" class=""><a href="https://www.youtube.com/watch?v=IFVVk4Bp5o0">https://www.youtube.com/watch?v=IFVVk4Bp5o0</a></p><p id="d1656ef1-c960-4572-b74e-53746b778dc2" class=""><a href="https://www.youtube.com/watch?v=xvgeHaYMeIE">https://www.youtube.com/watch?v=xvgeHaYMeIE</a></p><p id="7721a1b8-82b9-4f98-998b-68cc0f337465" class=""><a href="https://www.youtube.com/watch?v=GbSLls33jIU">https://www.youtube.com/watch?v=GbSLls33jIU</a></p><p id="2a560a3a-566c-4890-887f-5779143d25e6" class=""><a href="https://www.youtube.com/watch?v=g-C25diaMaM">https://www.youtube.com/watch?v=g-C25diaMaM</a></p><h1 id="73426682-8754-4c51-895a-dc197b613b69" class="">Further questions</h1><p id="c96fd3e5-cb73-40d8-a282-63718f63e156" class="">What is a hack?</p><p id="2446ff5e-81a5-4793-af02-0688647cbe95" class="">How can we use these classifications to inform our surfing?</p><p id="0a82fd11-ddef-4641-b7a0-8dbb08d0b95e" class="">What the hell is a 360??</p><figure id="20add5c4-2d8d-4f53-9826-f28747e51744" class="image"><a href="https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExdzN3azRjeHFsdDVra2w0cTJwMHJ3emY5MGhhbDl2NHgzZGNmeWJqcSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/wFeDszteC9dGQ3cBSX/giphy.gif"><img src="https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExdzN3azRjeHFsdDVra2w0cTJwMHJ3emY5MGhhbDl2NHgzZGNmeWJqcSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/wFeDszteC9dGQ3cBSX/giphy.gif"/></a></figure><p id="43ea54a0-d585-4dd3-8de6-62564edcba16" class="">
+</p></div></article><span class="sans" style="font-size:14px;padding-top:2em"></span></body></html>
